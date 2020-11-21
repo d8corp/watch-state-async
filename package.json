@@ -1,0 +1,50 @@
+{
+  "name": "@watch-state/async",
+  "version": "1.0.0",
+  "description": "Get async data for watch-state",
+  "main": "index.js",
+  "module": "index.es6.js",
+  "jsnext:main": "index.es6.js",
+  "types": "index.d.ts",
+  "private": true,
+  "scripts": {
+    "build": "bin/release -rollup",
+    "test": "jest",
+    "patch": "bin/release -patch -rollup",
+    "minor": "bin/release -minor -rollup",
+    "major": "bin/release -major -rollup"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/d8corp/watch-state-async.git"
+  },
+  "keywords": [
+    "async",
+    "await",
+    "data",
+    "watch",
+    "state",
+    "watch-state",
+    "front-end"
+  ],
+  "author": "Mikhail Lysikov <d8corp@mail.ru>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/d8corp/watch-state-async/issues"
+  },
+  "homepage": "https://github.com/d8corp/watch-state-async",
+  "devDependencies": {
+    "@types/jest": "^26.0.15",
+    "jest": "^26.6.3",
+    "lodash": ">=4.17.19",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.33.3",
+    "rollup-plugin-typescript2": "^0.29.0",
+    "ts-jest": "^26.4.4",
+    "typescript": "^4.1.2"
+  },
+  "dependencies": {
+    "watch-state": ">=1.0.2",
+    "tslib": ">=2"
+  }
+}

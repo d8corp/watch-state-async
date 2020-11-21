@@ -1,0 +1,244 @@
+import {cache, state, event, createEvent} from 'watch-state'
+
+type AsyncValue <V = any> = V | (() => V)
+
+type AsyncResolve <V = any> = (value: AsyncValue<V>) => AsyncValue<V>
+type AsyncReject <E = any> = (error: AsyncValue<E>) => AsyncValue<E>
+
+type AsyncThen <V> = (value: V) => any
+
+type AsyncFunction <V = any, E = any> = (resolve: AsyncResolve<V>, reject: AsyncReject<E>) => void
+
+type AsyncEvent = () => any
+type AsyncEventType = 'resolve' | 'reject' | 'update'
+type AsyncEvents = Set<AsyncEvent>
+type AsyncEventList = { [key: string]: AsyncEvents }
+type IAsyncOptions <V = any, E = any> = {
+  request?: AsyncFunction <V, E>
+  timeout?: number
+  loading?: boolean
+  loaded?: boolean
+  events?: AsyncEventList
+  default?: V | ((a: Async) => V)
+  response?: V | ((a: Async) => V)
+  error?: E | ((a: Async) => E)
+  resolve?: AsyncResolve<V>
+  reject?: AsyncReject<E>
+  keepResponse?: boolean
+  keepError?: boolean
+}
+
+const AsyncBreak = Symbol('break')
+const ONCE = Symbol('once')
+
+class AsyncOptions <V = any, E = any> implements IAsyncOptions<V, E> {
+  constructor (options: IAsyncOptions) {
+    Object.assign(this, options)
+  }
+  request?: AsyncFunction <V, E>
+  timeout?: number
+  @state loading?: boolean
+  @state loaded?: boolean
+  events?: AsyncEventList
+  default?: V | ((a: Async) => V)
+  @state response?: V | ((a: Async) => V)
+  @state error?: E | ((a: Async) => E)
+  resolve?: AsyncResolve<V>
+  reject?: AsyncReject<E>
+  keepResponse?: boolean
+  keepError?: boolean
+}
+
+class Async <V = any, E = any> {
+  protected readonly options: AsyncOptions
+  protected updated: boolean = true
+  protected timeout: number
+
+  constructor (request?: AsyncFunction<V, E>)
+  constructor (options?: IAsyncOptions<V, E>)
+  constructor (options: AsyncFunction<V, E> | IAsyncOptions<V, E> = {}) {
+    this.options = new AsyncOptions(typeof options === 'function' ? {request: options} : options)
+    this.update()
+  }
+
+  @event reset () {
+    const {options} = this
+    options.response = options.default
+    options.error = undefined
+  }
+
+  update (timeout: number = this.options.timeout): this {
+    const {options} = this
+    if (!options.request) return this
+    if (timeout && this.timeout + timeout > Date.now()) return this
+    if (options.loading === true) return this
+    this.updated = false
+    options.loading = true
+    return this
+  }
+
+  protected call () {
+    if (this.options.loading && !this.updated) {
+      const {options} = this
+      this.updated = true
+      this.trigger('update')
+      if ('request' in options) {
+        options.request(this.resolve, this.reject)
+      }
+    }
+  }
+
+  readonly resolve = createEvent((response?: AsyncValue<V>): this => {
+    const {options} = this
+    if (options.resolve) {
+      response = options.resolve(response)
+    }
+    options.loading = false
+    options.loaded = true
+    options.response = response
+    if (!options.keepError) {
+      options.error = undefined
+    }
+    this.timeout = Date.now()
+    this.trigger('resolve')
+    return this
+  })
+
+  readonly reject = createEvent((error?: AsyncValue<E>): this => {
+    const {options} = this
+    if (options.reject) {
+      error = options.reject(error)
+    }
+    options.loading = false
+    options.error = error
+    if (!options.keepResponse) {
+      options.response = undefined
+    }
+    this.trigger('reject')
+    return this
+  })
+
+  @cache get loading (): boolean {
+    this.call()
+    return this.options.loading || false
+  }
+  @cache get loaded (): boolean {
+    this.call()
+    return this.options.loaded || false
+  }
+  @cache get default (): V {
+    this.call()
+    return typeof this.options.default === 'function' ? this.options.default(this) : this.options.default
+  }
+  @cache get response (): V {
+    this.call()
+    return typeof this.options.response === 'function' ? this.options.response(this) : this.options.response
+  }
+  @cache get error (): E {
+    this.call()
+    return typeof this.options.error === 'function' ? this.options.error(this) : this.options.error
+  }
+  @cache get value (): V {
+    this.call()
+    return this.response ?? this.default
+  }
+
+  // event system
+  get events (): AsyncEventList {
+    if (!this.options.events) {
+      this.options.events = {}
+    }
+    return this.options.events
+  }
+
+  private startEvent (event: string) {
+    const {events} = this
+    if (!events[event]) {
+      events[event] = new Set()
+    }
+  }
+
+  on (event: AsyncEventType | string, callback: AsyncEvent): this {
+    const {events} = this
+    this.startEvent(event)
+    callback[ONCE] = false
+    events[event].add(callback)
+    return this
+  }
+
+  once (event: AsyncEventType | string, callback: AsyncEvent): this {
+    const {events} = this
+    this.startEvent(event)
+    callback[ONCE] = true
+    events[event].add(callback)
+    return this
+  }
+
+  off (event: AsyncEventType | string, callback: AsyncEvent): this {
+    const {options} = this
+    if (!options.events || !options.events[event]) return this
+    options.events[event].delete(callback)
+    return this
+  }
+
+  trigger (event: AsyncEventType | string): this {
+    const {options} = this
+    if (!options.events || !options.events[event]) return this
+    for (const listener of options.events[event]) {
+      if(listener[ONCE]) {
+        options.events[event].delete(listener)
+      }
+      if (listener() === AsyncBreak) {
+        break
+      }
+    }
+    return this
+  }
+
+  // promise system
+  then (resolve?: AsyncThen<V>, reject?: AsyncThen<E>): Promise<V> {
+    const {options} = this
+    if (options.loading) {} else {
+      this.response
+    }
+    return new Promise((res, rej) => {
+      const finish = () => {
+        if (this.error) {
+          rej(this.error)
+        } else {
+          res(this.value)
+        }
+      }
+      if (this.loading) {
+        const listener = () => {
+          finish()
+          this.off('resolve', listener)
+          this.off('reject', listener)
+        }
+        this.once('resolve', listener)
+        this.once('reject', listener)
+      } else {
+        finish()
+      }
+    }).then(resolve, reject)
+  }
+  catch (reject?: AsyncThen<E>): Promise<V> {
+    return this.then(undefined, reject)
+  }
+  finally (fin?: AsyncThen<V> | AsyncThen<E>): Promise<V> {
+    return this.then(fin as AsyncThen<V>, fin as AsyncThen<E>)
+  }
+}
+
+export default Async
+
+export {
+  AsyncBreak,
+  IAsyncOptions,
+  AsyncEventList,
+  AsyncEvents,
+  AsyncEvent,
+  AsyncFunction,
+  AsyncReject,
+  AsyncResolve,
+}
