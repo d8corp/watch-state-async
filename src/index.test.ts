@@ -546,7 +546,10 @@ describe('Async', () => {
       })
     })
   })
-  describe('autorun', () => {
+  describe('watch', () => {
+    test('create in watch without error', () => {
+      new Watch(() => new Async(() => {}))
+    })
     describe('value', () => {
       test('sync', () => {
         const async = new Async()

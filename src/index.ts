@@ -67,7 +67,7 @@ class Async <V = any, E = any> {
     options.error = undefined
   }
 
-  update (timeout: number = this.options.timeout): this {
+  @event update (timeout: number = this.options.timeout): this {
     const {options} = this
     if (!options.request) return this
     if (timeout && this.timeout + timeout > Date.now()) return this
