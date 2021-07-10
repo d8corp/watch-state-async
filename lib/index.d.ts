@@ -1,15 +1,15 @@
-declare type AsyncValue<V = any> = V | (() => V);
-declare type AsyncResolve<V = any> = (value: AsyncValue<V>) => AsyncValue<V>;
-declare type AsyncReject<E = any> = (error: AsyncValue<E>) => AsyncValue<E>;
-declare type AsyncThen<V> = (value: V) => any;
-declare type AsyncFunction<V = any, E = any> = (resolve: AsyncResolve<V>, reject: AsyncReject<E>) => void;
-declare type AsyncEvent = () => any;
-declare type AsyncEventType = 'resolve' | 'reject' | 'update';
-declare type AsyncEvents = Set<AsyncEvent>;
-declare type AsyncEventList = {
+export declare type AsyncValue<V = any> = V | (() => V);
+export declare type AsyncResolve<V = any> = (value: AsyncValue<V>) => AsyncValue<V>;
+export declare type AsyncReject<E = any> = (error: AsyncValue<E>) => AsyncValue<E>;
+export declare type AsyncThen<V> = (value: V) => any;
+export declare type AsyncFunction<V = any, E = any> = (resolve: AsyncResolve<V>, reject: AsyncReject<E>) => void;
+export declare type AsyncEvent = () => any;
+export declare type AsyncEventType = 'resolve' | 'reject' | 'update';
+export declare type AsyncEvents = Set<AsyncEvent>;
+export declare type AsyncEventList = {
     [key: string]: AsyncEvents;
 };
-declare type IAsyncOptions<V = any, E = any> = {
+export declare type IAsyncOptions<V = any, E = any> = {
     request?: AsyncFunction<V, E>;
     timeout?: number;
     loading?: boolean;
@@ -23,8 +23,9 @@ declare type IAsyncOptions<V = any, E = any> = {
     keepResponse?: boolean;
     keepError?: boolean;
 };
-declare const AsyncBreak: unique symbol;
-declare class AsyncOptions<V = any, E = any> implements IAsyncOptions<V, E> {
+export declare const AsyncBreak: unique symbol;
+export declare const ONCE: unique symbol;
+export declare class AsyncOptions<V = any, E = any> implements IAsyncOptions<V, E> {
     constructor(options: IAsyncOptions);
     request?: AsyncFunction<V, E>;
     timeout?: number;
@@ -39,7 +40,7 @@ declare class AsyncOptions<V = any, E = any> implements IAsyncOptions<V, E> {
     keepResponse?: boolean;
     keepError?: boolean;
 }
-declare class Async<V = any, E = any> {
+export declare class Async<V = any, E = any> {
     protected readonly options: AsyncOptions;
     protected updated: boolean;
     protected timeout: number;
@@ -47,17 +48,23 @@ declare class Async<V = any, E = any> {
     constructor(options?: IAsyncOptions<V, E>);
     reset(): void;
     update(timeout?: number): this;
-    protected call(): void;
+    protected checkUpdate(): void;
     readonly resolve: (response?: AsyncValue<V>) => this;
     readonly reject: (error?: AsyncValue<E>) => this;
+    private get _loading();
     get loading(): boolean;
+    private get _loaded();
     get loaded(): boolean;
+    private get _default();
     get default(): V;
+    private get _response();
     get response(): V;
+    private get _error();
     get error(): E;
+    private get _value();
     get value(): V;
     get events(): AsyncEventList;
-    private startEvent;
+    private addEvent;
     on(event: AsyncEventType | string, callback: AsyncEvent): this;
     once(event: AsyncEventType | string, callback: AsyncEvent): this;
     off(event: AsyncEventType | string, callback: AsyncEvent): this;
@@ -67,4 +74,3 @@ declare class Async<V = any, E = any> {
     finally(fin?: AsyncThen<V> | AsyncThen<E>): Promise<V>;
 }
 export default Async;
-export { AsyncBreak, IAsyncOptions, AsyncEventList, AsyncEvents, AsyncEvent, AsyncFunction, AsyncReject, AsyncResolve, };
