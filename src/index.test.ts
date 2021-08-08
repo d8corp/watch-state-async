@@ -696,4 +696,19 @@ describe('Async', () => {
       expect(test4?.test).toBe(undefined)
     })
   })
+  test('one by one bug', async () => {
+    new Async({
+      request (resolve) {
+        setTimeout(() => resolve(false))
+      }
+    }).value;
+
+    const groupsRequest = new Async({
+      request (resolve) {
+        setTimeout(() => resolve(true))
+      },
+    })
+
+    expect(await groupsRequest).toBe(true)
+  })
 })

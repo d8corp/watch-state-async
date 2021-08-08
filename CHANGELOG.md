@@ -2,6 +2,9 @@
 
 ## v1.2
 
+### v1.2.2 [![08.08.2021](https://img.shields.io/date/1628446177)](https://github.com/d8corp/watch-state-async/tree/v1.2.2)
+- updated dependencies to fix bugs
+
 ### v1.2.1 [![07.08.2021](https://img.shields.io/date/1628369157)](https://github.com/d8corp/watch-state-async/tree/v1.2.1)
 - updated dependencies
 
