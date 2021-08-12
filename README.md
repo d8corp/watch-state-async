@@ -8,7 +8,7 @@
 
 [![NPM](https://img.shields.io/npm/v/@watch-state/async.svg)](https://www.npmjs.com/package/@watch-state/async)
 [![downloads](https://img.shields.io/npm/dm/@watch-state/async.svg)](https://www.npmtrends.com/@watch-state/async)
-[![downloads](https://img.shields.io/badge/Changelog-⋮-brightgreen)](https://changelogs.xyz/@watch-state/async)
+[![changelog](https://img.shields.io/badge/Changelog-⋮-brightgreen)](https://changelogs.xyz/@watch-state/async)
 [![license](https://img.shields.io/npm/l/@watch-state/async)](https://github.com/d8corp/watch-state-async/blob/main/LICENSE)
 
 Getting async data with [watch-state](https://www.npmjs.com/package/watch-state).
