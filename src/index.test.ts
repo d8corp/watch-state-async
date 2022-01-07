@@ -711,4 +711,16 @@ describe('Async', () => {
 
     expect(await groupsRequest).toBe(true)
   })
+  test('update bug', () => {
+    let i = 0
+    const a = new Async(resolve => resolve(i++))
+
+    new Watch(() => a.value)
+
+    expect(i).toBe(1)
+
+    a.update()
+
+    expect(i).toBe(2)
+  })
 })

@@ -1,4 +1,4 @@
-import {cache, state, event} from '@watch-state/decorators'
+import { cache, state, event, getDecors } from '@watch-state/decorators'
 
 export type AsyncValue <V = any> = V | (() => V)
 
@@ -68,51 +68,74 @@ export class Async <V = any, E = any> {
   }
 
   @event update (timeout: number = this.options.timeout): this {
-    const {options} = this
+    const { options } = this
     if (!options.request) return this
     if (timeout && this.timeout + timeout > Date.now()) return this
     if (options.loading === true) return this
     this.updated = false
     options.loading = true
+
+    const decors = getDecors<{
+      _loading: 'cache',
+      _value: 'cache',
+      _error: 'cache',
+      _loaded: 'cache',
+    }>(this)
+
+    if (!decors._loading?.size && (decors._value?.size || decors._loaded?.size || decors._error?.size)) {
+      this.forceUpdate()
+    }
     return this
   }
 
-  @event protected checkUpdate () {
+  @event forceUpdate () {
+    const {options} = this
+    this.updated = true
+    if ('request' in options) {
+      options.request(this.resolve, this.reject)
+    }
+    this.trigger('update')
+  }
+
+  checkUpdate () {
     if (!this.updated) {
-      const {options} = this
-      this.updated = true
-      if ('request' in options) {
-        options.request(this.resolve, this.reject)
-      }
-      this.trigger('update')
+      this.forceUpdate()
     }
   }
 
   @event readonly resolve = (response?: AsyncValue<V>): this => {
     const {options} = this
+
     if (options.resolve) {
       response = options.resolve(response)
     }
+
     options.loading = false
     options.loaded = true
     options.response = response
+
     if (!options.keepError) {
       options.error = undefined
     }
+
     this.timeout = Date.now()
     this.trigger('resolve')
     return this
   }
   @event readonly reject = (error?: AsyncValue<E>): this => {
     const {options} = this
+
     if (options.reject) {
       error = options.reject(error)
     }
+
     options.loading = false
     options.error = error
+
     if (!options.keepResponse) {
       options.response = undefined
     }
+
     this.trigger('reject')
     return this
   }

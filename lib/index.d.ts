@@ -48,7 +48,8 @@ export declare class Async<V = any, E = any> {
     constructor(options?: IAsyncOptions<V, E>);
     reset(): void;
     update(timeout?: number): this;
-    protected checkUpdate(): void;
+    forceUpdate(): void;
+    checkUpdate(): void;
     readonly resolve: (response?: AsyncValue<V>) => this;
     readonly reject: (error?: AsyncValue<E>) => this;
     private get _loading();
