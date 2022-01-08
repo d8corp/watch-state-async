@@ -44,8 +44,8 @@ export declare class Async<V = any, E = any> {
     protected readonly options: AsyncOptions;
     protected updated: boolean;
     protected timeout: number;
-    constructor(request?: AsyncFunction<V, E>);
-    constructor(options?: IAsyncOptions<V, E>);
+    constructor(request?: AsyncFunction<V, E>, update?: boolean);
+    constructor(options?: IAsyncOptions<V, E>, update?: boolean);
     reset(): void;
     update(timeout?: number): this;
     forceUpdate(): void;

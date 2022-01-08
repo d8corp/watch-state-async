@@ -723,4 +723,16 @@ describe('Async', () => {
 
     expect(i).toBe(2)
   })
+  test('update argument', async () => {
+    const onResolve = jest.fn()
+    const request = new Async<void>(resolve => setTimeout(resolve), false).on('resolve', onResolve)
+
+    await request
+
+    expect(onResolve).toBeCalledTimes(0);
+
+    await request.update()
+
+    expect(onResolve).toBeCalledTimes(1);
+  })
 })

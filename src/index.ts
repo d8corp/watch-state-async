@@ -54,11 +54,14 @@ export class Async <V = any, E = any> {
   protected updated: boolean = true
   protected timeout: number
 
-  constructor (request?: AsyncFunction<V, E>)
-  constructor (options?: IAsyncOptions<V, E>)
-  constructor (options: AsyncFunction<V, E> | IAsyncOptions<V, E> = {}) {
-    this.options = new AsyncOptions(typeof options === 'function' ? {request: options} : options)
-    this.update()
+  constructor (request?: AsyncFunction<V, E>, update?: boolean)
+  constructor (options?: IAsyncOptions<V, E>, update?: boolean)
+  constructor (options: AsyncFunction<V, E> | IAsyncOptions<V, E> = {}, update: boolean = true) {
+    this.options = new AsyncOptions(typeof options === 'function' ? { request: options } : options)
+
+    if (update) {
+      this.update()
+    }
   }
 
   @event reset () {

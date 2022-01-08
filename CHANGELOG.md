@@ -2,6 +2,9 @@
 
 ## v1.2
 
+### v1.2.4 [![08.01.2022](https://img.shields.io/date/1641642267)](https://github.com/d8corp/watch-state-async/tree/v1.2.4)
+- added `update` argument of `Async` constructor
+
 ### v1.2.3 [![07.01.2022](https://img.shields.io/date/1641558987)](https://github.com/d8corp/watch-state-async/tree/v1.2.3)
 - updated `@watch-state/decorators` to `v1.2.3`
 - fixed update bug for `value`, `error` and `loaded` fields using
