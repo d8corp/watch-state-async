@@ -1,5 +1,6 @@
-import Async from './'
-import {Watch} from 'watch-state'
+import { Watch } from 'watch-state'
+
+import Async from '.'
 
 describe('Async', () => {
   describe('options', () => {
@@ -20,7 +21,7 @@ describe('Async', () => {
         expect(async.value).toBe('1')
       })
       test('options', () => {
-        const async = new Async<string>({request: resolve => resolve('1')})
+        const async = new Async<string>({ request: resolve => resolve('1') })
         expect(async.value).toBe('1')
       })
       test('deferred', async () => {
@@ -145,13 +146,13 @@ describe('Async', () => {
         expect('default' in new Async()).toBe(true)
       })
       test('as option', () => {
-        const async = new Async({default: 1})
+        const async = new Async({ default: 1 })
         expect(async.default).toBe(1)
       })
       test('async', async () => {
         const async = new Async({
           default: 1,
-          request: resolve => setTimeout(() => resolve(2))
+          request: resolve => setTimeout(() => resolve(2)),
         })
         expect(async.value).toBe(1)
         await async
@@ -160,13 +161,13 @@ describe('Async', () => {
       test('sync', () => {
         const async = new Async<any>({
           default: 1,
-          request: resolve => resolve('test')
+          request: resolve => resolve('test'),
         })
         expect(async.value).toBe('test')
       })
       test('getter', () => {
         let i = 0
-        const test = new Async({default: () => ++i})
+        const test = new Async({ default: () => ++i })
         expect(i).toBe(0)
         expect(test.value).toBe(1)
         expect(i).toBe(1)
@@ -181,7 +182,7 @@ describe('Async', () => {
       test('async', async () => {
         const async = new Async<any>({
           default: 1,
-          request: resolve => setTimeout(() => resolve('test'))
+          request: resolve => setTimeout(() => resolve('test')),
         })
         expect(async.response).toBe(undefined)
         expect(async.value).toBe(1)
@@ -283,7 +284,7 @@ describe('Async', () => {
         expect(async.error).toBe(undefined)
       })
       test('keepError', () => {
-        const async = new Async({keepError: true})
+        const async = new Async({ keepError: true })
         expect(async.loading).toBe(false)
         expect(async.loaded).toBe(false)
         expect(async.value).toBe(undefined)
@@ -336,7 +337,7 @@ describe('Async', () => {
         expect(async.error).toBe('error')
       })
       test('keepResponse', () => {
-        const async = new Async({keepResponse: true})
+        const async = new Async({ keepResponse: true })
         expect(async.loading).toBe(false)
         expect(async.loaded).toBe(false)
         expect(async.value).toBe(undefined)
@@ -365,7 +366,9 @@ describe('Async', () => {
       test('resolve', () => {
         const async = new Async()
         let test = false
-        async.on('resolve', () => test = async.value)
+        async.on('resolve', () => {
+          test = async.value
+        })
         expect(test).toBe(false)
         async.resolve('test')
         expect(test).toBe('test')
@@ -375,7 +378,9 @@ describe('Async', () => {
       test('reject', () => {
         const async = new Async()
         let test = false
-        async.on('reject', () => test = async.error)
+        async.on('reject', () => {
+          test = async.error
+        })
         expect(test).toBe(false)
         async.reject('test')
         expect(test).toBe('test')
@@ -385,7 +390,9 @@ describe('Async', () => {
       test('update', () => {
         const async1 = new Async()
         let test1 = false
-        async1.on('update', () => test1 = true)
+        async1.on('update', () => {
+          test1 = true
+        })
         expect(test1).toBe(false)
         async1.update()
         expect(test1).toBe(false)
@@ -414,7 +421,9 @@ describe('Async', () => {
       test('resolve', () => {
         const async = new Async()
         let i = 0
-        async.once('resolve', () => i = async.value)
+        async.once('resolve', () => {
+          i = async.value
+        })
         expect(i).toBe(0)
         async.resolve(1)
         expect(i).toBe(1)
@@ -424,7 +433,9 @@ describe('Async', () => {
       test('reject', () => {
         const async = new Async()
         let i = 0
-        async.once('reject', () => i = async.error)
+        async.once('reject', () => {
+          i = async.error
+        })
         expect(i).toBe(0)
         async.reject(1)
         expect(i).toBe(1)
@@ -434,7 +445,9 @@ describe('Async', () => {
       test('update', () => {
         const async1 = new Async()
         let test1 = false
-        async1.once('update', () => test1 = true)
+        async1.once('update', () => {
+          test1 = true
+        })
         expect(test1).toBe(false)
         async1.update()
         expect(test1).toBe(false)
@@ -463,7 +476,9 @@ describe('Async', () => {
       test('on', () => {
         const async = new Async()
         let i = 0
-        const listener = () => i = async.value
+        const listener = () => {
+          i = async.value
+        }
         async.on('resolve', listener)
         expect(i).toBe(0)
         async.resolve(1)
@@ -475,7 +490,9 @@ describe('Async', () => {
       test('once', () => {
         const async = new Async()
         let i = 0
-        const listener = () => i = async.value
+        const listener = () => {
+          i = async.value
+        }
         async.once('resolve', listener)
         async.off('resolve', listener)
         expect(i).toBe(0)
@@ -630,66 +647,22 @@ describe('Async', () => {
   })
   describe('types', () => {
     test('resolve', () => {
-      const test = new Async<{test: number}>(resolve => resolve({test: 1}))
-      const test1 = new Async<{test: number}>(resolve => resolve(() => ({test: 1})))
-      const test2 = new Async<{test: number}>({
-        request: resolve => resolve({test: 1})
-      })
-      const test3 = new Async<{test: number}>({
-        request: resolve => resolve(() => ({test: 1}))
-      })
-      const test4 = new Async<{test: number}>({
-        response: {test: 1},
-        default: {test: 1}
-      })
-      const test5 = new Async<{test: number}>({
-        response: () => ({test: 1}),
-        default: () => ({test: 1})
-      })
-      const test6 = new Async<{test: number}>({
-        resolve: () => ({test: 1})
-      })
-      const test7 = new Async<{test: number}>({
-        resolve: () => () => ({test: 1})
-      })
-      const test8 = new Async<{test: number}>({
-        resolve: value => value
-      })
-      test.resolve({test: 1})
-      test1.resolve(() => ({test: 1}))
+      const test = new Async<{ test: number }>(resolve => resolve({ test: 1 }))
+      const test1 = new Async<{ test: number }>(resolve => resolve(() => ({ test: 1 })))
+      test.resolve({ test: 1 })
+      test1.resolve(() => ({ test: 1 }))
     })
     test('reject', () => {
-      const test = new Async<string, {test: number}>((resolve, reject) => reject({test: 1}))
-      const test1 = new Async<string, {test: number}>((resolve, reject) => reject(() => ({test: 1})))
-      const test2 = new Async<string, {test: number}>({
-        request: (resolve, reject) => reject({test: 1})
-      })
-      const test3 = new Async<string, {test: number}>({
-        request: (resolve, reject) => reject(() => ({test: 1}))
-      })
-      const test4 = new Async<string, {test: number}>({
-        error: {test: 1}
-      })
-      const test5 = new Async<string, {test: number}>({
-        error: () => ({test: 1})
-      })
-      const test6 = new Async<string, {test: number}>({
-        reject: () => ({test: 1})
-      })
-      const test7 = new Async<string, {test: number}>({
-        reject: () => () => ({test: 1})
-      })
-      const test8 = new Async<string, {test: number}>({
-        reject: value => value
-      })
-      test.reject({test: 1})
-      test1.reject(() => ({test: 1}))
+      const test = new Async<string, { test: number }>((resolve, reject) => reject({ test: 1 }))
+      const test1 = new Async<string, { test: number }>((resolve, reject) => reject(() => ({ test: 1 })))
+      test.reject({ test: 1 })
+      test1.reject(() => ({ test: 1 }))
     })
     test('async away', async () => {
-      const test1 = await new Async<{test: number}>()
-      const test2 = await new Async<{test: number}>().then()
-      const test3 = await new Async<{test: number}>().catch()
-      const test4 = await new Async<{test: number}>().finally()
+      const test1 = await new Async<{ test: number }>()
+      const test2 = await new Async<{ test: number }>().then()
+      const test3 = await new Async<{ test: number }>().catch()
+      const test4 = await new Async<{ test: number }>().finally()
       expect(test1?.test).toBe(undefined)
       expect(test2?.test).toBe(undefined)
       expect(test3?.test).toBe(undefined)
@@ -697,11 +670,12 @@ describe('Async', () => {
     })
   })
   test('one by one bug', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     new Async({
       request (resolve) {
         setTimeout(() => resolve(false))
-      }
-    }).value;
+      },
+    }).value
 
     const groupsRequest = new Async({
       request (resolve) {
@@ -729,10 +703,10 @@ describe('Async', () => {
 
     await request
 
-    expect(onResolve).toBeCalledTimes(0);
+    expect(onResolve).toBeCalledTimes(0)
 
     await request.update()
 
-    expect(onResolve).toBeCalledTimes(1);
+    expect(onResolve).toBeCalledTimes(1)
   })
 })

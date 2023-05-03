@@ -1,4 +1,4 @@
-import { cache, state, event, getDecors } from '@watch-state/decorators'
+import { cache, event, getDecors, state } from '@watch-state/decorators'
 
 export type AsyncValue <V = any> = V | (() => V)
 
@@ -12,8 +12,8 @@ export type AsyncFunction <V = any, E = any> = (resolve: AsyncResolve<V>, reject
 export type AsyncEvent = () => any
 export type AsyncEventType = 'resolve' | 'reject' | 'update'
 export type AsyncEvents = Set<AsyncEvent>
-export type AsyncEventList = { [key: string]: AsyncEvents }
-export type IAsyncOptions <V = any, E = any> = {
+export type AsyncEventList = Record<string, AsyncEvents>
+export interface IAsyncOptions <V = any, E = any> {
   request?: AsyncFunction <V, E>
   timeout?: number
   loading?: boolean
@@ -35,14 +35,15 @@ export class AsyncOptions <V = any, E = any> implements IAsyncOptions<V, E> {
   constructor (options: IAsyncOptions) {
     Object.assign(this, options)
   }
+
   request?: AsyncFunction <V, E>
   timeout?: number
-  @state loading?: boolean
-  @state loaded?: boolean
+  @state accessor loading: boolean
+  @state accessor loaded: boolean
   events?: AsyncEventList
   default?: V | ((a: Async) => V)
-  @state response?: V | ((a: Async) => V)
-  @state error?: E | ((a: Async) => E)
+  @state accessor response: V | ((a: Async) => V)
+  @state accessor error: E | ((a: Async) => E)
   resolve?: AsyncResolve<V>
   reject?: AsyncReject<E>
   keepResponse?: boolean
@@ -65,7 +66,7 @@ export class Async <V = any, E = any> {
   }
 
   @event reset () {
-    const {options} = this
+    const { options } = this
     options.response = options.default
     options.error = undefined
   }
@@ -74,25 +75,25 @@ export class Async <V = any, E = any> {
     const { options } = this
     if (!options.request) return this
     if (timeout && this.timeout + timeout > Date.now()) return this
-    if (options.loading === true) return this
+    if (options.loading) return this
     this.updated = false
     options.loading = true
 
     const decors = getDecors<{
-      _loading: 'cache',
-      _value: 'cache',
-      _error: 'cache',
-      _loaded: 'cache',
+      _loading: 'cache'
+      _value: 'cache'
+      _error: 'cache'
+      _loaded: 'cache'
     }>(this)
 
-    if (!decors._loading?.size && (decors._value?.size || decors._loaded?.size || decors._error?.size)) {
+    if (!decors._loading?.childWatchers.size && (decors._value?.childWatchers.size || decors._loaded?.childWatchers.size || decors._error?.childWatchers.size)) {
       this.forceUpdate()
     }
     return this
   }
 
   @event forceUpdate () {
-    const {options} = this
+    const { options } = this
     this.updated = true
     if ('request' in options) {
       options.request(this.resolve, this.reject)
@@ -107,7 +108,7 @@ export class Async <V = any, E = any> {
   }
 
   @event readonly resolve = (response?: AsyncValue<V>): this => {
-    const {options} = this
+    const { options } = this
 
     if (options.resolve) {
       response = options.resolve(response)
@@ -125,8 +126,9 @@ export class Async <V = any, E = any> {
     this.trigger('resolve')
     return this
   }
+
   @event readonly reject = (error?: AsyncValue<E>): this => {
-    const {options} = this
+    const { options } = this
 
     if (options.reject) {
       error = options.reject(error)
@@ -146,6 +148,7 @@ export class Async <V = any, E = any> {
   @cache private get _loading (): boolean {
     return this.options.loading || false
   }
+
   get loading () {
     this.checkUpdate()
     return this._loading
@@ -154,6 +157,7 @@ export class Async <V = any, E = any> {
   @cache private get _loaded (): boolean {
     return this.options.loaded || false
   }
+
   get loaded () {
     this.checkUpdate()
     return this._loaded
@@ -162,6 +166,7 @@ export class Async <V = any, E = any> {
   @cache private get _default (): V {
     return typeof this.options.default === 'function' ? this.options.default(this) : this.options.default
   }
+
   get default () {
     this.checkUpdate()
     return this._default
@@ -170,16 +175,17 @@ export class Async <V = any, E = any> {
   @cache private get _response (): V {
     return typeof this.options.response === 'function' ? this.options.response(this) : this.options.response
   }
+
   get response () {
     this.checkUpdate()
     return this._response
   }
 
-
   @cache private get _error (): E {
     this.checkUpdate()
     return typeof this.options.error === 'function' ? this.options.error(this) : this.options.error
   }
+
   get error () {
     this.checkUpdate()
     return this._error
@@ -188,6 +194,7 @@ export class Async <V = any, E = any> {
   @cache private get _value (): V {
     return this.response ?? this.default
   }
+
   get value () {
     this.checkUpdate()
     return this._value
@@ -200,35 +207,40 @@ export class Async <V = any, E = any> {
     }
     return this.options.events
   }
+
   private addEvent (event: string, callback: AsyncEvent) {
-    const {events} = this
+    const { events } = this
     if (events[event]) {
       events[event].add(callback)
     } else {
       events[event] = new Set([callback])
     }
   }
+
   on (event: AsyncEventType | string, callback: AsyncEvent): this {
     callback[ONCE] = false
     this.addEvent(event, callback)
     return this
   }
+
   once (event: AsyncEventType | string, callback: AsyncEvent): this {
     callback[ONCE] = true
     this.addEvent(event, callback)
     return this
   }
+
   off (event: AsyncEventType | string, callback: AsyncEvent): this {
-    const {options} = this
+    const { options } = this
     if (!options.events || !options.events[event]) return this
     options.events[event].delete(callback)
     return this
   }
+
   @event trigger (event: AsyncEventType | string): this {
-    const {options} = this
+    const { options } = this
     if (!options.events || !options.events[event]) return this
     for (const listener of options.events[event]) {
-      if(listener[ONCE]) {
+      if (listener[ONCE]) {
         options.events[event].delete(listener)
       }
       if (listener() === AsyncBreak) {
@@ -240,17 +252,17 @@ export class Async <V = any, E = any> {
 
   // promise system
   @event then (resolve?: AsyncThen<V>, reject?: AsyncThen<E>): Promise<V> {
-    const {options} = this
+    const { options } = this
     if (!options.loading) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       this.response
     }
-    return new Promise((res, rej) => {
-
+    return new Promise((resolve, reject) => {
       const finish = () => {
         if (this.error) {
-          rej(this.error)
+          reject(this.error)
         } else {
-          res(this.value)
+          resolve(this.value)
         }
       }
 
@@ -262,9 +274,11 @@ export class Async <V = any, E = any> {
       }
     }).then(resolve, reject)
   }
+
   catch (reject?: AsyncThen<E>): Promise<V> {
     return this.then(undefined, reject)
   }
+
   finally (fin?: AsyncThen<V> | AsyncThen<E>): Promise<V> {
     return this.then(fin as AsyncThen<V>, fin as AsyncThen<E>)
   }
