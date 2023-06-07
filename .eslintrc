@@ -19,6 +19,7 @@
     "jest": true
   },
   "rules": {
+    "prefer-promise-reject-errors": "off",
     "@typescript-eslint/prefer-optional-chain": "off",
     "@typescript-eslint/ban-types": "off",
     "no-redeclare": "off",
