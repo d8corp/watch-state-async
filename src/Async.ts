@@ -71,17 +71,6 @@ export default class Async<V, E = unknown> extends Observable<V> {
     }
   }
 
-  @event reset () {
-    this.#loading = true
-    this.#loaded = false
-    this.#error = undefined
-
-    if (this.rawValue !== this.#defaultValue) {
-      this.rawValue = this.#defaultValue
-      queueWatchers(this.observers)
-    }
-  }
-
   #forcePromise () {
     return this.#promise === undefined ? this.#forceUpdate() : this.#promise
   }
