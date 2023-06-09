@@ -1,5 +1,4 @@
 node_modules
-lib
 docs
-bin
+release
 jest.config.js
