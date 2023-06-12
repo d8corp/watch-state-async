@@ -39,6 +39,9 @@ var Async = (() => {
                 tslib.__classPrivateFieldGet(this, _Async_instances, "m", _Async_forcePromise).call(this);
                 return super.value;
             }
+            asyncResolve(value) {
+                this.resolve(value);
+            }
             resolve(value) {
                 tslib.__classPrivateFieldSet(this, _Async_instances, false, "a", _Async_loading_set);
                 tslib.__classPrivateFieldSet(this, _Async_instances, true, "a", _Async_loaded_set);
@@ -111,13 +114,13 @@ var Async = (() => {
             tslib.__esDecorate(_a, _private_forceUpdate_descriptor = { value: tslib.__setFunctionName(function () {
                     tslib.__classPrivateFieldSet(this, _Async_lastCall, Date.now(), "f");
                     tslib.__classPrivateFieldSet(this, _Async_instances, true, "a", _Async_loading_set);
-                    tslib.__classPrivateFieldSet(this, _Async_promise, tslib.__classPrivateFieldGet(this, _Async_handler, "f").call(this).then(watchState.createEvent(value => {
-                        this.resolve(value);
+                    tslib.__classPrivateFieldSet(this, _Async_promise, tslib.__classPrivateFieldGet(this, _Async_handler, "f").call(this).then(value => {
+                        this.asyncResolve(value);
                         return value;
-                    }), watchState.createEvent((e) => {
+                    }, (e) => {
                         this.reject(e);
                         return Promise.reject(e);
-                    })), "f");
+                    }), "f");
                     return tslib.__classPrivateFieldGet(this, _Async_promise, "f");
                 }, "#forceUpdate") }, _private_forceUpdate_decorators, { kind: "method", name: "#forceUpdate", static: false, private: true, access: { has: obj => tslib.__classPrivateFieldIn(_Async_instances, obj), get: obj => tslib.__classPrivateFieldGet(obj, _Async_instances, "a", _Async_forceUpdate_get) } }, null, _instanceExtraInitializers);
             tslib.__esDecorate(_a, null, _resolve_decorators, { kind: "method", name: "resolve", static: false, private: false, access: { has: obj => "resolve" in obj, get: obj => obj.resolve } }, null, _instanceExtraInitializers);

@@ -1,7 +1,7 @@
 import { event, state } from '@watch-state/decorators'
-import { createEvent, Observable, queueWatchers } from 'watch-state'
+import { Observable, queueWatchers } from 'watch-state'
 
-export default class Async<V, E = unknown> extends Observable<V> {
+export default class Async<V, E = Error> extends Observable<V> {
   @state accessor #loading = true
   @state accessor #loaded = false
   @state accessor #error: E
@@ -36,16 +36,20 @@ export default class Async<V, E = unknown> extends Observable<V> {
     this.#loading = true
 
     this.#promise = this.#handler().then(
-      createEvent(value => {
-        this.resolve(value)
+      value => {
+        this.asyncResolve(value)
         return value
-      }),
-      createEvent((e: E) => {
+      },
+      (e: E) => {
         this.reject(e)
         return Promise.reject(e)
-      }))
+      })
 
     return this.#promise
+  }
+
+  protected asyncResolve (value: V) {
+    this.resolve(value)
   }
 
   @event protected resolve (value: V) {
@@ -65,6 +69,7 @@ export default class Async<V, E = unknown> extends Observable<V> {
   }
 
   update (): Promise<V>
+  update (timeout?: number): Promise<V> | void
   update (timeout?: number) {
     if (!timeout || this.#lastCall + timeout > Date.now()) {
       return this.#forceUpdate()

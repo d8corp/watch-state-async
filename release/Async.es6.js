@@ -1,6 +1,6 @@
 import { __classPrivateFieldGet, __classPrivateFieldSet, __runInitializers, __esDecorate, __setFunctionName, __classPrivateFieldIn } from 'tslib';
 import { state, event } from '@watch-state/decorators';
-import { Observable, queueWatchers, createEvent } from 'watch-state';
+import { Observable, queueWatchers } from 'watch-state';
 
 var Async = (() => {
     var _Async_instances, _a, _Async_loading_accessor_storage, _Async_loading_get, _Async_loading_set, _Async_loaded_accessor_storage, _Async_loaded_get, _Async_loaded_set, _Async_error_accessor_storage, _Async_error_get, _Async_error_set, _Async_lastCall, _Async_promise, _Async_defaultValue, _Async_handler, _Async_forceUpdate_get, _Async_forcePromise;
@@ -34,6 +34,9 @@ var Async = (() => {
             get value() {
                 __classPrivateFieldGet(this, _Async_instances, "m", _Async_forcePromise).call(this);
                 return super.value;
+            }
+            asyncResolve(value) {
+                this.resolve(value);
             }
             resolve(value) {
                 __classPrivateFieldSet(this, _Async_instances, false, "a", _Async_loading_set);
@@ -107,13 +110,13 @@ var Async = (() => {
             __esDecorate(_a, _private_forceUpdate_descriptor = { value: __setFunctionName(function () {
                     __classPrivateFieldSet(this, _Async_lastCall, Date.now(), "f");
                     __classPrivateFieldSet(this, _Async_instances, true, "a", _Async_loading_set);
-                    __classPrivateFieldSet(this, _Async_promise, __classPrivateFieldGet(this, _Async_handler, "f").call(this).then(createEvent(value => {
-                        this.resolve(value);
+                    __classPrivateFieldSet(this, _Async_promise, __classPrivateFieldGet(this, _Async_handler, "f").call(this).then(value => {
+                        this.asyncResolve(value);
                         return value;
-                    }), createEvent((e) => {
+                    }, (e) => {
                         this.reject(e);
                         return Promise.reject(e);
-                    })), "f");
+                    }), "f");
                     return __classPrivateFieldGet(this, _Async_promise, "f");
                 }, "#forceUpdate") }, _private_forceUpdate_decorators, { kind: "method", name: "#forceUpdate", static: false, private: true, access: { has: obj => __classPrivateFieldIn(_Async_instances, obj), get: obj => __classPrivateFieldGet(obj, _Async_instances, "a", _Async_forceUpdate_get) } }, null, _instanceExtraInitializers);
             __esDecorate(_a, null, _resolve_decorators, { kind: "method", name: "resolve", static: false, private: false, access: { has: obj => "resolve" in obj, get: obj => obj.resolve } }, null, _instanceExtraInitializers);

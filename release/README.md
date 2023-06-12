@@ -113,7 +113,6 @@ new Watch(() => {
   console.log(promise.error)
 })
 // > undefined
-await promise
 // > 1
 ```
 
