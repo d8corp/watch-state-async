@@ -35,9 +35,6 @@ var Async = (() => {
                 __classPrivateFieldGet(this, _Async_instances, "m", _Async_forcePromise).call(this);
                 return super.value;
             }
-            asyncResolve(value) {
-                this.resolve(value);
-            }
             resolve(value) {
                 __classPrivateFieldSet(this, _Async_instances, false, "a", _Async_loading_set);
                 __classPrivateFieldSet(this, _Async_instances, true, "a", _Async_loaded_set);
@@ -111,7 +108,7 @@ var Async = (() => {
                     __classPrivateFieldSet(this, _Async_lastCall, Date.now(), "f");
                     __classPrivateFieldSet(this, _Async_instances, true, "a", _Async_loading_set);
                     __classPrivateFieldSet(this, _Async_promise, __classPrivateFieldGet(this, _Async_handler, "f").call(this).then(value => {
-                        this.asyncResolve(value);
+                        this.resolve(value);
                         return value;
                     }, (e) => {
                         this.reject(e);

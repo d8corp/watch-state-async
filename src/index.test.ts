@@ -225,4 +225,12 @@ describe('Async', () => {
 
     expect(i).toBe(2)
   })
+  test('error', () => {
+    const error = Error('test')
+    const a = new Async(async () => {
+      throw error
+    })
+
+    expect(a).rejects.toBe(error)
+  })
 })

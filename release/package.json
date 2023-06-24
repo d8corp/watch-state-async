@@ -1,6 +1,6 @@
 {
   "name": "@watch-state/async",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.3",
   "description": "Get async data for watch-state",
   "main": "index.js",
   "module": "index.es6.js",

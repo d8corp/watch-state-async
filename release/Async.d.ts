@@ -5,7 +5,6 @@ export default class Async<V, E = Error> extends Observable<V> {
     get loading(): boolean;
     get error(): E;
     get value(): V;
-    protected asyncResolve(value: V): void;
     protected resolve(value: V): void;
     protected reject(e: E): void;
     update(): Promise<V>;

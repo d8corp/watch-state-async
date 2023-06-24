@@ -37,7 +37,7 @@ export default class Async<V, E = Error> extends Observable<V> {
 
     this.#promise = this.#handler().then(
       value => {
-        this.asyncResolve(value)
+        this.resolve(value)
         return value
       },
       (e: E) => {
@@ -46,10 +46,6 @@ export default class Async<V, E = Error> extends Observable<V> {
       })
 
     return this.#promise
-  }
-
-  protected asyncResolve (value: V) {
-    this.resolve(value)
   }
 
   @event protected resolve (value: V) {
